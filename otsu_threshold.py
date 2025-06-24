@@ -1,34 +1,23 @@
-#!/usr/bin/env python3
-import nibabel as nib
 import numpy as np
+import nibabel as nib
 from skimage.filters import threshold_otsu
 
-def otsu_segmentation(input_file: str, output_file: str):
-    """
-    1. Load the compressed SPECT volume (.nii.gz)
-    2. Compute Otsu’s threshold on the middle slice
-    3. Apply that global threshold to the entire volume
-    4. Save the binary mask as a new NIfTI
-    """
-    # 1. Load
-    img  = nib.load(input_file)
-    data = img.get_fdata()
-    aff  = img.affine
-    hdr  = img.header
+# Parameters
+input_path = 'spect.nii.gz'  # Path to the input SPECT NIfTI file
+output_path = 'otsu_threshold_mask.nii.gz'  # Path to save the binary mask
 
-    # 2. Compute Otsu on the central slice
-    mid_idx = data.shape[2] // 2
-    mid_slice = data[:, :, mid_idx]
-    thresh = threshold_otsu(mid_slice)
-    print(f"Otsu threshold (mid‐slice): {thresh:.2f}")
+# Load the SPECT volume
+img = nib.load(input_path)
+data = img.get_fdata()
 
-    # 3. Apply globally
-    mask = (data > thresh).astype(np.uint8)
+# Compute global Otsu threshold
+global_thresh = threshold_otsu(data)
+print(f"Computed Otsu threshold: {global_thresh}")
 
-    # 4. Save result
-    out = nib.Nifti1Image(mask, aff, hdr)
-    nib.save(out, output_file)
-    print(f"Saved Otsu‐threshold mask → {output_file}")
+# Apply threshold to create binary mask
+mask = (data > global_thresh).astype(np.uint8)
 
-if __name__ == "__main__":
-    otsu_segmentation("spect.nii.gz", "otsu_seg.nii.gz")
+# Save the mask as NIfTI
+mask_img = nib.Nifti1Image(mask, img.affine, img.header)
+mask_img.to_filename(output_path)
+print(f"Otsu threshold mask saved to {output_path}")
