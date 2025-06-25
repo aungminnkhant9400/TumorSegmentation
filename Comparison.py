@@ -17,9 +17,9 @@ def dice_coefficient(m1, m2):
 # Paths
 data_path = 'spect.nii.gz'
 masks = {
-    'adaptive': 'adaptive_threshold_mask.nii.gz',
+    'adaptive': 'random_walker_mask.nii.gz',
     'otsu':     'otsu_threshold_mask.nii.gz',
-    'fixed':    'fixed_threshold_mask.nii.gz'
+    'fixed':    'mask_pct99.nii.gz'
 }
 
 # Load data
